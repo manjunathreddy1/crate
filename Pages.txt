@@ -1,33 +1,24 @@
-import * as React from "react";
-import { ComboBox, IComboBox, IComboBoxOption } from "@fluentui/react";
+import { getSP } from "./pnpjsConfig";
+import { PermissionKind } from "@pnp/sp/security";
+import "@pnp/sp/webs";
+import "@pnp/sp/files";
 
-const options: IComboBoxOption[] = [
-  { key: "A", text: "Option A" },
-  { key: "B", text: "Option B" },
-  { key: "C", text: "Option C" },
-];
+export const checkUserReadPermissionOnPage = async (pageUrl: string): Promise<boolean> => {
+  try {
+    const sp = getSP();
 
-const MyComboBox: React.FC = () => {
-  const [selectedKey, setSelectedKey] = React.useState<string | number | undefined>(undefined);
+    // Get the file object of the site page
+    const file = sp.web.getFileByServerRelativePath(pageUrl);
 
-  const handleComboBoxChange = (
-    event: React.FormEvent<IComboBox>,
-    option?: IComboBoxOption
-  ): void => {
-    if (option) {
-      console.log("Selected item:", option);
-      setSelectedKey(option.key); // update state if needed
-    }
-  };
+    // Check if the current user has Read permission on this file
+    const hasPermission = await file
+      .select("EffectiveBasePermissions")
+      .get()
+      .then(f => sp.web.hasPermissions(f.EffectiveBasePermissions, PermissionKind.ViewListItems));
 
-  return (
-    <ComboBox
-      label="Choose an option"
-      options={options}
-      selectedKey={selectedKey}
-      onChange={handleComboBoxChange}
-    />
-  );
+    return hasPermission;
+  } catch (error) {
+    console.error("Error checking permissions:", error);
+    return false;
+  }
 };
-
-export default MyComboBox;
