@@ -1,32 +1,51 @@
-import { spfi } from "@pnp/sp";
-import "@pnp/sp/webs";
+import { spfi, SPFI } from "@pnp/sp";
+import { Caching } from "@pnp/queryable";
 import "@pnp/sp/folders";
-import "@pnp/sp/files";
-import "@pnp/sp/items"; // Needed for ListItemAllFields
-import { SPFx } from "@pnp/sp/presets/all"; // For SPFx context
+import "@pnp/sp/items";
+import "@pnp/sp/lists";
+import "@pnp/sp/webs";
+import "@pnp/sp/security";
+import { getSP } from "./pnpjsConfig";
 
-const sp = spfi().using(SPFx(this.context)); // Replace with your actual context
-
-interface IPageTemplate {
-  name: string;
-  title?: string;
-  id?: number;
-  [key: string]: any;
+// Extend with BannerImageUrl
+interface IPageTemplateListItem {
+  Id: number;
+  Title: string;
+  ContentTypeId: string;
+  BannerImageUrl?: string;
 }
 
-const getTemplateFilesWithMetadata = async (): Promise<IPageTemplate[]> => {
+// Also include in output
+interface IPageTemplate {
+  name: string;
+  title: string;
+  id: number;
+  contentTypeId: string;
+  bannerImageUrl?: string;
+}
+
+export const GetTemplateItems = async (): Promise<IPageTemplate[]> => {
   try {
-    const folder = sp.web.getFolderByServerRelativePath("/sites/yoursite/SitePages/Templates");
+    let _sp: SPFI;
+    _sp = getSP();
 
-    const files = await folder.files.expand("ListItemAllFields")();
+    const spCache = spfi(_sp).using(Caching({ store: "session" }));
 
-    const mapped: IPageTemplate[] = files.map(f => {
-      const item = f.ListItemAllFields as any; // You can define a stronger type if needed
+    const files = await spCache.web
+      .getFolderByServerRelativePath("/sites/Cadence/SitePages/Templates")
+      .files.expand("ListItemAllFields")();
+
+    const mapped: IPageTemplate[] = files.map((f) => {
+      const item = (
+        f as unknown as { ListItemAllFields: IPageTemplateListItem }
+      ).ListItemAllFields;
+
       return {
         name: f.Name,
-        title: item?.Title,
-        id: item?.Id,
-        contentTypeId: item?.ContentTypeId
+        title: item.Title,
+        id: item.Id,
+        contentTypeId: item.ContentTypeId,
+        bannerImageUrl: item.BannerImageUrl, // Pick it here
       };
     });
 
