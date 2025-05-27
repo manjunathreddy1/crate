@@ -1,0 +1,62 @@
+import React, { useEffect, useState } from "react";
+import { spfi, SPFx } from "@pnp/sp";
+import { getSP } from "../pnpjsConfig"; // or your SPFI initializer
+
+interface IPageTemplate {
+  ID: number;
+  Title: string;
+  ContentTypeName: string;
+  BannerImageUrl: string;
+}
+
+const PageTemplateList: React.FC = () => {
+  const [templates, setTemplates] = useState<IPageTemplate[]>([]);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const sp = getSP(); // your spfi(SPFx(context)) config
+        const folderPath = "SitePages/Templates";
+
+        const items = await sp.web.getFolderByServerRelativePath(folderPath)
+          .files
+          .expand("ListItemAllFields/ContentType")
+          .select("ListItemAllFields/ID", "ListItemAllFields/Title", "ListItemAllFields/BannerImageUrl", "ListItemAllFields/ContentType/Name")
+         ();
+
+        const mapped: IPageTemplate[] = items
+          .map(f => {
+            const item = f.ListItemAllFields;
+            return {
+              ID: item.ID,
+              Title: item.Title,
+              ContentTypeName: item.ContentType?.Name ?? "Unknown",
+              BannerImageUrl: item.BannerImageUrl ?? "",
+            };
+          });
+
+        setTemplates(mapped);
+      } catch (err) {
+        console.error("Error loading page templates", err);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  return (
+    <div>
+      <h3>Page Templates</h3>
+      <ul>
+        {templates.map(t => (
+          <li key={t.ID}>
+            <strong>{t.Title}</strong> ({t.ContentTypeName})<br />
+            Banner: {t.BannerImageUrl ? <img src={t.BannerImageUrl} alt="" width={100} /> : "No image"}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default PageTemplateList;
