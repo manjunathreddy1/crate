@@ -1,57 +1,33 @@
-import { spfi, SPFI } from "@pnp/sp";
-import { Caching } from "@pnp/queryable";
-import "@pnp/sp/folders";
-import "@pnp/sp/items";
-import "@pnp/sp/lists";
-import "@pnp/sp/webs";
-import "@pnp/sp/security";
-import { getSP } from "./pnpjsConfig";
+import * as React from "react";
+import { ComboBox, IComboBox, IComboBoxOption } from "@fluentui/react";
 
-// Extend with BannerImageUrl
-interface IPageTemplateListItem {
-  Id: number;
-  Title: string;
-  ContentTypeId: string;
-  BannerImageUrl?: string;
-}
+const options: IComboBoxOption[] = [
+  { key: "A", text: "Option A" },
+  { key: "B", text: "Option B" },
+  { key: "C", text: "Option C" },
+];
 
-// Also include in output
-interface IPageTemplate {
-  name: string;
-  title: string;
-  id: number;
-  contentTypeId: string;
-  bannerImageUrl?: string;
-}
+const MyComboBox: React.FC = () => {
+  const [selectedKey, setSelectedKey] = React.useState<string | number | undefined>(undefined);
 
-export const GetTemplateItems = async (): Promise<IPageTemplate[]> => {
-  try {
-    let _sp: SPFI;
-    _sp = getSP();
+  const handleComboBoxChange = (
+    event: React.FormEvent<IComboBox>,
+    option?: IComboBoxOption
+  ): void => {
+    if (option) {
+      console.log("Selected item:", option);
+      setSelectedKey(option.key); // update state if needed
+    }
+  };
 
-    const spCache = spfi(_sp).using(Caching({ store: "session" }));
-
-    const files = await spCache.web
-      .getFolderByServerRelativePath("/sites/Cadence/SitePages/Templates")
-      .files.expand("ListItemAllFields")();
-
-    const mapped: IPageTemplate[] = files.map((f) => {
-      const item = (
-        f as unknown as { ListItemAllFields: IPageTemplateListItem }
-      ).ListItemAllFields;
-
-      return {
-        name: f.Name,
-        title: item.Title,
-        id: item.Id,
-        contentTypeId: item.ContentTypeId,
-        bannerImageUrl: item.BannerImageUrl, // Pick it here
-      };
-    });
-
-    return mapped;
-  } catch (error) {
-    console.error("Error fetching template files:", error);
-    return [];
-  }
+  return (
+    <ComboBox
+      label="Choose an option"
+      options={options}
+      selectedKey={selectedKey}
+      onChange={handleComboBoxChange}
+    />
+  );
 };
+
+export default MyComboBox;
