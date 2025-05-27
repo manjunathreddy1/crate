@@ -2,23 +2,29 @@ import { getSP } from "./pnpjsConfig";
 import { PermissionKind } from "@pnp/sp/security";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
+import "@pnp/sp/items";
 
 export const checkUserReadPermissionOnPage = async (pageUrl: string): Promise<boolean> => {
   try {
     const sp = getSP();
 
-    // Get the file object of the site page
-    const file = sp.web.getFileByServerRelativePath(pageUrl);
+    // Get file and expand ListItemAllFields to access EffectiveBasePermissions
+    const fileInfo = await sp.web.getFileByServerRelativePath(pageUrl)
+      .expand("ListItemAllFields")
+      .select("ListItemAllFields/EffectiveBasePermissions")
+     ();
 
-    // Check if the current user has Read permission on this file
-    const hasPermission = await file
-      .select("EffectiveBasePermissions")
-      .get()
-      .then(f => sp.web.hasPermissions(f.EffectiveBasePermissions, PermissionKind.ViewListItems));
+    const effectivePermissions = fileInfo?.ListItemAllFields?.EffectiveBasePermissions;
 
+    if (!effectivePermissions) {
+      console.warn("Permissions info not available.");
+      return false;
+    }
+
+    const hasPermission = sp.web.hasPermissions(effectivePermissions, PermissionKind.ViewListItems);
     return hasPermission;
   } catch (error) {
-    console.error("Error checking permissions:", error);
+    console.error("Error checking read permissions:", error);
     return false;
   }
 };
