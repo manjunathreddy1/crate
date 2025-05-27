@@ -1,30 +1,40 @@
 import { getSP } from "./pnpjsConfig";
-import { PermissionKind } from "@pnp/sp/security";
+import { PermissionKind, IBasePermissions } from "@pnp/sp/security";
 import "@pnp/sp/webs";
 import "@pnp/sp/files";
-import "@pnp/sp/items";
 
-export const checkUserReadPermissionOnPage = async (pageUrl: string): Promise<boolean> => {
+interface IFileWithPermissions {
+  ListItemAllFields: {
+    EffectiveBasePermissions: IBasePermissions;
+  };
+}
+
+export const checkUserReadPermissionOnPage = async (
+  serverRelativeUrl: string
+): Promise<boolean> => {
   try {
     const sp = getSP();
 
-    // Get file and expand ListItemAllFields to access EffectiveBasePermissions
-    const fileInfo = await sp.web.getFileByServerRelativePath(pageUrl)
+    const file = await sp.web
+      .getFileByServerRelativePath(serverRelativeUrl)
       .expand("ListItemAllFields")
-      .select("ListItemAllFields/EffectiveBasePermissions")
-     ();
+      .select("ListItemAllFields/EffectiveBasePermissions")();
 
-    const effectivePermissions = fileInfo?.ListItemAllFields?.EffectiveBasePermissions;
+    const typedFile = file as IFileWithPermissions;
 
-    if (!effectivePermissions) {
-      console.warn("Permissions info not available.");
+    if (!typedFile?.ListItemAllFields?.EffectiveBasePermissions) {
+      console.warn("EffectiveBasePermissions not found on the file's list item.");
       return false;
     }
 
-    const hasPermission = sp.web.hasPermissions(effectivePermissions, PermissionKind.ViewListItems);
+    const hasPermission = sp.web.hasPermissions(
+      typedFile.ListItemAllFields.EffectiveBasePermissions,
+      PermissionKind.ViewListItems
+    );
+
     return hasPermission;
   } catch (error) {
-    console.error("Error checking read permissions:", error);
+    console.error("Error checking page permissions:", error);
     return false;
   }
 };
