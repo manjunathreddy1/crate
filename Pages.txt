@@ -1,40 +1,21 @@
-import { getSP } from "./pnpjsConfig";
-import { PermissionKind, IBasePermissions } from "@pnp/sp/security";
-import "@pnp/sp/webs";
-import "@pnp/sp/files";
+import { Dialog, DialogType, IDialogStyles } from '@fluentui/react';
 
-interface IFileWithPermissions {
-  ListItemAllFields: {
-    EffectiveBasePermissions: IBasePermissions;
-  };
-}
-
-export const checkUserReadPermissionOnPage = async (
-  serverRelativeUrl: string
-): Promise<boolean> => {
-  try {
-    const sp = getSP();
-
-    const file = await sp.web
-      .getFileByServerRelativePath(serverRelativeUrl)
-      .expand("ListItemAllFields")
-      .select("ListItemAllFields/EffectiveBasePermissions")();
-
-    const typedFile = file as IFileWithPermissions;
-
-    if (!typedFile?.ListItemAllFields?.EffectiveBasePermissions) {
-      console.warn("EffectiveBasePermissions not found on the file's list item.");
-      return false;
-    }
-
-    const hasPermission = sp.web.hasPermissions(
-      typedFile.ListItemAllFields.EffectiveBasePermissions,
-      PermissionKind.ViewListItems
-    );
-
-    return hasPermission;
-  } catch (error) {
-    console.error("Error checking page permissions:", error);
-    return false;
+const dialogStyles: Partial<IDialogStyles> = {
+  main: {
+    width: '600px',
+    height: '400px',
+    maxHeight: 'none' // optional: prevents it from being restricted
   }
 };
+
+<Dialog
+  hidden={false}
+  onDismiss={() => {}}
+  dialogContentProps={{
+    type: DialogType.normal,
+    title: 'Custom Size Dialog',
+  }}
+  styles={dialogStyles}
+>
+  <p>Your dialog content goes here.</p>
+</Dialog>
