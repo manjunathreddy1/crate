@@ -1,26 +1,23 @@
-import * as React from "react";
-import { Dialog, DialogType, PrimaryButton } from "@fluentui/react";
+import { spfi } from "@pnp/sp";
+import { SPFx } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/files";
+import "@pnp/sp/items";
+import "@pnp/sp/site-users";
 
-export const FluentDialogExample: React.FC = () => {
-  const dialogContentProps = {
-    type: DialogType.normal,
-    title: "Dialog Title",
-    subText: "This is the dialog content. It appears over a dimmed overlay.",
-  };
+// Initialize spfi
+const sp = spfi().using(SPFx(context)); // use your actual context
 
-  const modalProps = {
-    isBlocking: false, // Set to true to prevent dismiss by clicking outside
-    styles: { main: { maxWidth: 450 } },
-  };
+const destinationFileUrl = "/sites/yoursite/SitePages/MyPage.aspx";
 
-  return (
-    <>
-      <PrimaryButton text="Open Dialog" />
-      <Dialog
-        hidden={false}
-        dialogContentProps={dialogContentProps}
-        modalProps={modalProps}
-      ></Dialog>
-    </>
-  );
-};
+// Step 1: Get the file's list item
+const pageItem = await sp.web.getFileByServerRelativePath(destinationFileUrl).getItem();
+
+// Step 2: Ensure the user exists and get their ID
+const currentUser = await sp.web.currentUser();
+const ensuredUser = await sp.web.ensureUser(currentUser.LoginName);
+
+// Step 3: Update the Author field
+await pageItem.update({
+  AuthorId: ensuredUser.Id,
+});
