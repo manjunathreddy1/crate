@@ -1,21 +1,26 @@
-import { Dialog, DialogType, IDialogStyles } from '@fluentui/react';
+import * as React from "react";
+import { Dialog, DialogType, PrimaryButton } from "@fluentui/react";
 
-const dialogStyles: Partial<IDialogStyles> = {
-  main: {
-    width: '600px',
-    height: '400px',
-    maxHeight: 'none' // optional: prevents it from being restricted
-  }
-};
-
-<Dialog
-  hidden={false}
-  onDismiss={() => {}}
-  dialogContentProps={{
+export const FluentDialogExample: React.FC = () => {
+  const dialogContentProps = {
     type: DialogType.normal,
-    title: 'Custom Size Dialog',
-  }}
-  styles={dialogStyles}
->
-  <p>Your dialog content goes here.</p>
-</Dialog>
+    title: "Dialog Title",
+    subText: "This is the dialog content. It appears over a dimmed overlay.",
+  };
+
+  const modalProps = {
+    isBlocking: false, // Set to true to prevent dismiss by clicking outside
+    styles: { main: { maxWidth: 450 } },
+  };
+
+  return (
+    <>
+      <PrimaryButton text="Open Dialog" />
+      <Dialog
+        hidden={false}
+        dialogContentProps={dialogContentProps}
+        modalProps={modalProps}
+      ></Dialog>
+    </>
+  );
+};
