@@ -1,37 +1,18 @@
-import * as React from 'react';
-import {
-  Combobox,
-  Option,
-  OptionOnSelectData,
-  SelectionEvents
-} from '@fluentui/react-components';
+import React from 'react';
 
-const FluentUIV9ComboBox = () => {
-  const [selectedValue, setSelectedValue] = React.useState('');
-
-  const handleOptionSelect = (
-    event: SelectionEvents,
-    data: OptionOnSelectData
-  ) => {
-    // data.optionValue is the selected value
-    setSelectedValue(data.optionValue?data.optionValue:'');
-  };
-
+const VerticalForm = () => {
   return (
-    <div>
-      <Combobox
-        placeholder="Select an option"
-        value={selectedValue}
-        onOptionSelect={handleOptionSelect}
-      >
-        <Option value="option1">Option 1</Option>
-        <Option value="option2">Option 2</Option>
-        <Option value="option3">Option 3</Option>
-      </Combobox>
-
-      <p>Selected value: {selectedValue}</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <input type="text" placeholder="Name" />
+      <input type="email" placeholder="Email" />
+      <select>
+        <option>Select an option</option>
+        <option>Option 1</option>
+        <option>Option 2</option>
+      </select>
+      <button>Submit</button>
     </div>
   );
 };
 
-export default FluentUIV9ComboBox;
+export default VerticalForm;
