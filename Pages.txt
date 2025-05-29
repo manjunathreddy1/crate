@@ -1,21 +1,27 @@
 import * as React from 'react';
-import { TextField } from '@fluentui/react-components';
-import { StackShim, StackItemShim } from '@fluentui/react-migration-v8-v9';
+import {
+  Combobox,
+  Option,
+  ComboboxProps,
+} from '@fluentui/react-components';
 
-export const SideBySideSplitWithStackItem = () => {
+export const ComboBoxExample = () => {
+  const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
+
+  const handleChange: ComboboxProps['onOptionSelect'] = (event, data) => {
+    setSelectedValue(data.optionValue);
+    console.log('Selected:', data.optionValue);
+  };
+
   return (
-    <StackShim
-      horizontal
-      tokens={{ childrenGap: 16 }}
-      styles={{ root: { width: '100%' } }}
-    >
-      <StackItemShim styles={{ root: { flex: '0 0 30%' } }}>
-        <TextField label="First Name" />
-      </StackItemShim>
+    <div>
+      <Combobox onOptionSelect={handleChange} placeholder="Select an option">
+        <Option value="option1">Option 1</Option>
+        <Option value="option2">Option 2</Option>
+        <Option value="option3">Option 3</Option>
+      </Combobox>
 
-      <StackItemShim styles={{ root: { flex: '0 0 70%' } }}>
-        <TextField label="Last Name" />
-      </StackItemShim>
-    </StackShim>
+      <p>Selected Value: {selectedValue}</p>
+    </div>
   );
 };
