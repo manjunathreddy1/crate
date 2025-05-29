@@ -4,12 +4,16 @@ import { StackShim, StackItemShim } from '@fluentui/react-migration-v8-v9';
 
 export const SideBySideSplitWithStackItem = () => {
   return (
-    <StackShim horizontal tokens={{ childrenGap: 16 }} styles={{ root: { width: '100%' } }}>
-      <StackItemShim styles={{ root: { flexBasis: '30%', flexShrink: 0 } }}>
+    <StackShim
+      horizontal
+      tokens={{ childrenGap: 16 }}
+      styles={{ root: { width: '100%' } }}
+    >
+      <StackItemShim styles={{ root: { flex: '0 0 30%' } }}>
         <TextField label="First Name" />
       </StackItemShim>
 
-      <StackItemShim styles={{ root: { flexBasis: '70%', flexShrink: 0 } }}>
+      <StackItemShim styles={{ root: { flex: '0 0 70%' } }}>
         <TextField label="Last Name" />
       </StackItemShim>
     </StackShim>
