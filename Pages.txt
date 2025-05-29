@@ -7,7 +7,6 @@ import "@pnp/sp/webs";
 import "@pnp/sp/security";
 import { getSP } from "./pnpjsConfig";
 
-// Extend with ContentType Name
 interface IPageTemplateListItem {
   Id: number;
   Title: string;
@@ -18,7 +17,6 @@ interface IPageTemplateListItem {
   };
 }
 
-// Also include in output
 interface IPageTemplate {
   name: string;
   title: string;
@@ -30,29 +28,31 @@ interface IPageTemplate {
 
 export const GetTemplateItems = async (): Promise<IPageTemplate[]> => {
   try {
-    let _sp: SPFI;
-    _sp = getSP();
-
+    const _sp: SPFI = getSP();
     const spCache = spfi(_sp).using(Caching({ store: "session" }));
 
     const files = await spCache.web
       .getFolderByServerRelativePath("/sites/Cadence/SitePages/Templates")
       .files.expand("ListItemAllFields, ListItemAllFields/ContentType")();
 
-    const mapped: IPageTemplate[] = files.map((f) => {
+    const mapped: IPageTemplate[] = [];
+
+    for (const f of files) {
       const item = (
         f as unknown as { ListItemAllFields: IPageTemplateListItem }
       ).ListItemAllFields;
 
-      return {
-        name: f.Name,
-        title: item.Title,
-        id: item.Id,
-        contentTypeId: item.ContentTypeId,
-        contentTypeName: item.ContentType?.Name ?? "",
-        bannerImageUrl: item.BannerImageUrl,
-      };
-    });
+      if (item?.ContentType?.Name === "News") {
+        mapped.push({
+          name: f.Name,
+          title: item.Title,
+          id: item.Id,
+          contentTypeId: item.ContentTypeId,
+          contentTypeName: item.ContentType.Name,
+          bannerImageUrl: item.BannerImageUrl,
+        });
+      }
+    }
 
     return mapped;
   } catch (error) {
