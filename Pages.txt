@@ -1,32 +1,37 @@
 import * as React from 'react';
-import { Combobox, Option } from '@fluentui/react-components';
+import {
+  Combobox,
+  Option,
+  OptionOnSelectData,
+  SelectionEvents
+} from '@fluentui/react-components';
 
-const ComboBoxExample = () => {
+const FluentUIV9ComboBox = () => {
   const [selectedValue, setSelectedValue] = React.useState('');
 
   const handleOptionSelect = (
-    event: React.SyntheticEvent,
-    data: { optionValue: string }
+    event: SelectionEvents,
+    data: OptionOnSelectData
   ) => {
-    setSelectedValue(data.optionValue);
-    console.log('Selected value:', data.optionValue);
+    // data.optionValue is the selected value
+    setSelectedValue(data.optionValue?data.optionValue:'');
   };
 
   return (
     <div>
       <Combobox
+        placeholder="Select an option"
         value={selectedValue}
         onOptionSelect={handleOptionSelect}
-        placeholder="Select an option"
       >
         <Option value="option1">Option 1</Option>
         <Option value="option2">Option 2</Option>
         <Option value="option3">Option 3</Option>
       </Combobox>
 
-      <p>Selected Value: {selectedValue}</p>
+      <p>Selected value: {selectedValue}</p>
     </div>
   );
 };
 
-export default ComboBoxExample;
+export default FluentUIV9ComboBox;
