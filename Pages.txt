@@ -2,26 +2,32 @@ import * as React from 'react';
 import {
   Combobox,
   Option,
-  ComboboxProps,
+  ComboboxOnOptionSelectData,
 } from '@fluentui/react-components';
 
 export const ComboBoxExample = () => {
-  const [selectedValue, setSelectedValue] = React.useState<string | undefined>();
+  const [selectedValue, setSelectedValue] = React.useState<string>('');
 
-  const handleChange: ComboboxProps['onOptionSelect'] = (event, data) => {
-    setSelectedValue(data.optionValue);
-    console.log('Selected:', data.optionValue);
+  const handleOptionSelect = (
+    event: React.SyntheticEvent,
+    data: ComboboxOnOptionSelectData
+  ) => {
+    setSelectedValue(data.optionValue); // ✅ Correct usage: optionValue
   };
 
   return (
     <div>
-      <Combobox onOptionSelect={handleChange} placeholder="Select an option">
+      <Combobox
+        placeholder="Select an option"
+        value={selectedValue}
+        onOptionSelect={handleOptionSelect}
+      >
         <Option value="option1">Option 1</Option>
         <Option value="option2">Option 2</Option>
         <Option value="option3">Option 3</Option>
       </Combobox>
 
-      <p>Selected Value: {selectedValue}</p>
+      <p>Selected: {selectedValue}</p>
     </div>
   );
 };
