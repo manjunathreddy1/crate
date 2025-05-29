@@ -1,18 +1,14 @@
 import * as React from 'react';
-import {
-  Combobox,
-  Option,
-  ComboboxOnOptionSelectData,
-} from '@fluentui/react-components';
+import { Combobox, Option } from '@fluentui/react-components';
 
 export const ComboBoxExample = () => {
-  const [selectedValue, setSelectedValue] = React.useState<string>('');
+  const [selectedValue, setSelectedValue] = React.useState('');
 
   const handleOptionSelect = (
     event: React.SyntheticEvent,
-    data: ComboboxOnOptionSelectData
+    data: { optionValue: string }
   ) => {
-    setSelectedValue(data.optionValue); // ✅ Correct usage: optionValue
+    setSelectedValue(data.optionValue);
   };
 
   return (
