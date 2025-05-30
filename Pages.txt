@@ -1,62 +1,7 @@
-import { spfi, SPFI } from "@pnp/sp";
-import { Caching } from "@pnp/queryable";
-import "@pnp/sp/folders";
-import "@pnp/sp/items";
-import "@pnp/sp/lists";
-import "@pnp/sp/webs";
-import "@pnp/sp/security";
-import { getSP } from "./pnpjsConfig";
-
-interface IPageTemplateListItem {
-  Id: number;
-  Title: string;
-  ContentTypeId: string;
-  BannerImageUrl?: string;
-  ContentType: {
-    Name: string;
-  };
-}
-
-interface IPageTemplate {
-  name: string;
-  title: string;
-  id: number;
-  contentTypeId: string;
-  contentTypeName: string;
-  bannerImageUrl?: string;
-}
-
-export const GetTemplateItems = async (): Promise<IPageTemplate[]> => {
-  try {
-    const _sp: SPFI = getSP();
-    const spCache = spfi(_sp).using(Caching({ store: "session" }));
-
-    const files = await spCache.web
-      .getFolderByServerRelativePath("/sites/Cadence/SitePages/Templates")
-      .files.expand("ListItemAllFields, ListItemAllFields/ContentType")();
-
-    const mapped: IPageTemplate[] = [];
-
-    for (const f of files) {
-      const item = (
-        f as unknown as { ListItemAllFields: IPageTemplateListItem }
-      ).ListItemAllFields;
-
-      if (item?.ContentType?.Name === "News") {
-        mapped.push({
-          name: f.Name,
-          title: item.Title,
-          id: item.Id,
-          contentTypeId: item.ContentTypeId,
-          contentTypeName: item.ContentType.Name,
-          bannerImageUrl: item.BannerImageUrl,
-        });
-      }
-    }
-
-    return mapped;
-  } catch (error) {
-    console.error("Error fetching template files:", error);
-    return [];
-  }
-};
+const files = await spCache.web.lists
+  .getByTitle("Site Pages")
+  .items
+  .filter("ContentType eq 'News'")
+  .select("Id", "Title", "FileRef", "ContentTypeId", "ContentType/Name")
+  .expand("ContentType")
+  .inFolder("/sites/Cadence/SitePages/Templates")();
