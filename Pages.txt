@@ -1,20 +1,15 @@
-const folderPath = "/sites/Cadence/SitePages/Templates"; // server-relative path
+const getItemTitles = async (context: WebPartContext): Promise<string[]> => {
+  const sp = spfi().using(SPFx(context));
 
-  const items = await sp.web.lists.getByTitle("Site Pages").items
-    .filter(`FileDirRef eq '${folderPath}'`)
-    .select("Id", "Title", "ContentTypeId", "BannerImageUrl", "ContentType/Name", "FileDirRef")
-    .expand("ContentType")();
+  try {
+    const items = await sp.web.lists.getByTitle("Your List Name").items.select("Title")();
 
-  const result: IPageTemplate[] = [];
+    // Push each title into a string array
+    const titles: string[] = items.map(item => item.Title);
+    return titles;
 
-  for (const item of items) {
-    if (item.ContentType?.Name === "News") {
-      result.push({
-        id: item.Id,
-        title: item.Title,
-        contentTypeId: item.ContentTypeId,
-        contentTypeName: item.ContentType.Name,
-        bannerImageUrl: item.BannerImageUrl,
-      });
-    }
+  } catch (error) {
+    console.error("Error fetching list items:", error);
+    return [];
   }
+};
