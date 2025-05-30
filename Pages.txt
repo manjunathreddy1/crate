@@ -1,7 +1,20 @@
-const files = await spCache.web.lists
-  .getByTitle("Site Pages")
-  .items
-  .filter("ContentType eq 'News'")
-  .select("Id", "Title", "FileRef", "ContentTypeId", "ContentType/Name")
-  .expand("ContentType")
-  .inFolder("/sites/Cadence/SitePages/Templates")();
+const folderPath = "/sites/Cadence/SitePages/Templates"; // server-relative path
+
+  const items = await sp.web.lists.getByTitle("Site Pages").items
+    .filter(`FileDirRef eq '${folderPath}'`)
+    .select("Id", "Title", "ContentTypeId", "BannerImageUrl", "ContentType/Name", "FileDirRef")
+    .expand("ContentType")();
+
+  const result: IPageTemplate[] = [];
+
+  for (const item of items) {
+    if (item.ContentType?.Name === "News") {
+      result.push({
+        id: item.Id,
+        title: item.Title,
+        contentTypeId: item.ContentTypeId,
+        contentTypeName: item.ContentType.Name,
+        bannerImageUrl: item.BannerImageUrl,
+      });
+    }
+  }
